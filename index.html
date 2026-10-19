@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Uzoqdagi guldasta</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Dancing+Script:wght@700&display=swap">
+<style>
+/* Layout: 9:16 night-sky stage. Arched pink caption on top, bouquet grown from a ribbon on canvas, "Seni sog'indim" script above it, small chat bubbles drifting across. Single dark look. */
+:root{--bg:#02030c;--ink:#fff;--pink:#ff9ccf;--red:#ff3b6b;--bub:#6b7cff;--disp:'Baloo 2','Trebuchet MS',sans-serif;--script:'Dancing Script','Brush Script MT',cursive;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;overflow:hidden}
+.stage{position:relative;max-width:440px;height:100%;margin:0 auto;background:linear-gradient(#02030c,#07123a 55%,#0b1f5a);cursor:pointer}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+svg.arc{position:absolute;left:0;right:0;top:max(8px,env(safe-area-inset-top,0px));width:100%;height:120px;z-index:2;pointer-events:none}
+svg.arc text{font:800 27px var(--disp);fill:#ff9ccf;stroke:#fff;stroke-width:.4px;paint-order:stroke;filter:drop-shadow(0 0 6px rgba(255,120,200,.7))}
+.miss{position:absolute;left:0;right:0;top:20%;text-align:center;font:700 clamp(30px,9vw,40px) var(--script);color:var(--red);text-shadow:0 0 10px rgba(255,40,100,.8);opacity:0;transform:translateY(8px) rotate(-4deg);transition:all 1.2s;z-index:2;pointer-events:none}
+.miss.on{opacity:1;transform:rotate(-4deg)}
+.bub{position:absolute;left:-60%;background:linear-gradient(135deg,#7a8bff,#5463e8);color:#fff;font:600 11px/1.3 system-ui,sans-serif;padding:7px 12px;border-radius:14px 14px 14px 3px;box-shadow:0 0 12px rgba(120,140,255,.6);white-space:nowrap;z-index:2;pointer-events:none}
+.hint{position:absolute;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom,0px));text-align:center;font:500 11px system-ui,sans-serif;opacity:.55;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important}}
+</style>
+<div class="stage" id="st" role="button" aria-label="Qayta boshlash">
+  <canvas id="cv"></canvas>
+  <svg class="arc" viewBox="0 0 440 120" preserveAspectRatio="xMidYMid meet" aria-label="U uzoqlarda bo'lganda"><defs><path id="ap" d="M10 100 Q220 -10 430 100"/></defs><text><textPath href="#ap" startOffset="50%" text-anchor="middle">U uzoqlarda bo'lganda ♡</textPath></text></svg>
+  <div class="miss" id="miss">Seni sog'indim ❤</div>
+  <div class="hint">Qayta ko'rish uchun ekranga bos</div>
+</div>
+<script>
+const $=i=>document.getElementById(i),cv=$('cv'),c=cv.getContext('2d'),st=$('st');
+let W,H,dpr=Math.min(devicePixelRatio||1,2);
+function fit(){const r=cv.getBoundingClientRect();W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;c.setTransform(dpr,0,0,dpr,0,0);build()}
+const stars=[],bfs=[];for(let i=0;i<90;i++)stars.push({x:Math.random(),y:Math.random(),s:Math.random()*1.3+.3,p:Math.random()*7});
+for(let i=0;i<10;i++)bfs.push({x:Math.random(),y:.12+Math.random()*.6,s:5+Math.random()*5,p:Math.random()*7,sp:.3+Math.random()*.5,c:Math.random()<.3?'#ffd18a':'#cfd8ff'});
+const cols=[['#ff2a55','#ff9ab0'],['#ff5f9e','#ffd1e6'],['#ffb020','#fff0b0'],['#2f7bff','#a8d4ff'],['#ff7a3c','#ffd0a8'],['#7a4cff','#d3c2ff'],['#e8153c','#ff8aa0'],['#ffffff','#ffc2dc']];
+let F=[],t0=0;
+function build(){F=[];const bx=W/2,by=H*.72,n=26;
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2+i,r=Math.sqrt((i+.5)/n);const ang=-Math.PI/2+Math.sin(a*1.7)*.2;
+    // dome-ish: spread x, y via heart-like top
+    const fx=bx+(Math.sin(i*2.399)*r)*W*.34,fy=by-H*.2-(Math.cos(i*2.399)*r*.5+.5)*H*.16-r*8;
+    const cc=cols[i%cols.length];F.push({fx,fy,bx,by,r:11+Math.random()*8+(1-r)*6,c:cc,k:i%3,d:.4+i*.075,rot:Math.random()*3,pts:i%3===0?9:i%3===1?12:7})}
+  t0=performance.now();$('miss').classList.remove('on');setTimeout(()=>$('miss').classList.add('on'),4600);bubbles()}
+function ease(t){t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)}
+function flower(f,s,ts){if(s<=0)return;c.save();c.translate(f.fx,f.fy);c.rotate(f.rot+Math.sin(ts/1500+f.d)*.05);c.scale(s,s);
+  const r=f.r,g=c.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,f.c[1]);g.addColorStop(.5,f.c[0]);g.addColorStop(1,f.c[0]);c.fillStyle=g;c.shadowColor=f.c[0];c.shadowBlur=8;
+  if(f.k===0){for(let i=0;i<f.pts;i++){c.rotate(Math.PI*2/f.pts);c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(r*.22,r*.5,0,r*1.15);c.quadraticCurveTo(-r*.22,r*.5,0,0);c.fill()}}
+  else if(f.k===1){for(let i=0;i<f.pts;i++){c.rotate(Math.PI*2/f.pts);c.beginPath();c.ellipse(0,r*.55,r*.26,r*.55,0,0,7);c.fill()}c.fillStyle='rgba(0,20,80,.5)';c.beginPath();c.arc(0,0,r*.22,0,7);c.fill()}
+  else{for(let i=0;i<f.pts;i++){c.rotate(Math.PI*2/f.pts);c.beginPath();c.moveTo(0,0);c.lineTo(r*.2,r*.55);c.lineTo(0,r*1.1);c.lineTo(-r*.2,r*.55);c.closePath();c.fill()}}
+  c.shadowBlur=0;c.fillStyle='#ffe58a';c.beginPath();c.arc(0,0,r*.12,0,7);c.fill();c.restore()}
+function ribbon(x,y){c.save();c.translate(x,y);c.fillStyle='#ff6fb1';c.shadowColor='#ff6fb1';c.shadowBlur=10;
+  [-1,1].forEach(s=>{c.save();c.scale(s,1);c.beginPath();c.moveTo(2,0);c.bezierCurveTo(28,-26,36,10,10,34);c.bezierCurveTo(6,30,4,14,2,0);c.fill();c.restore()});
+  c.fillStyle='#ff9ccf';c.beginPath();c.arc(0,2,6,0,7);c.fill();c.restore()}
+function frame(ts){
+  c.clearRect(0,0,W,H);
+  stars.forEach(s=>{c.globalAlpha=.3+.6*Math.abs(Math.sin(ts/1100+s.p));c.fillStyle='#fff';c.fillRect(s.x*W,s.y*H,s.s,s.s)});c.globalAlpha=1;
+  bfs.forEach(b=>{const x=(b.x*W+Math.sin(ts/2000*b.sp+b.p)*30+W)%W,y=b.y*H+Math.cos(ts/1700*b.sp+b.p)*18,w=Math.abs(Math.sin(ts/130+b.p));c.fillStyle=b.c;c.globalAlpha=.65;
+    [-1,1].forEach(s=>{c.save();c.translate(x,y);c.scale(s*(.25+.75*w),1);c.beginPath();c.ellipse(b.s*.55,-b.s*.3,b.s*.55,b.s*.28,-.5,0,7);c.ellipse(b.s*.5,b.s*.35,b.s*.4,b.s*.22,.5,0,7);c.fill();c.restore()})});c.globalAlpha=1;
+  const el=(ts-t0)/1000;
+  // stems
+  F.forEach(f=>{const g=ease((el-f.d*.35)/1.6);if(g<=0)return;const ex=f.bx+(f.fx-f.bx)*g,ey=f.by+(f.fy-f.by)*g;c.strokeStyle='#4f8a4a';c.lineWidth=1.4;c.beginPath();c.moveTo(f.bx,f.by);c.quadraticCurveTo(f.bx+(f.fx-f.bx)*.2,f.by-(f.by-f.fy)*.55,ex,ey);c.stroke();
+    if(g>.6){c.fillStyle='#3d7a3a';const lx=f.bx+(f.fx-f.bx)*.4,ly=f.by-(f.by-f.fy)*.4;c.beginPath();c.ellipse(lx+6,ly,7,2,.5,0,7);c.fill()}});
+  F.forEach(f=>flower(f,ease((el-1.4-f.d*.5)/1.3),ts));
+  ribbon(W/2,H*.72);
+  requestAnimationFrame(frame)}
+// chat bubbles
+const MSG=['Seni o\'ylayapman 💭','Sog\'indim, jonim 💌','Tezroq uchrashaylik 🥺','Yuragim sen bilan 💗'];
+let bt=[];function bubbles(){bt.forEach(clearTimeout);bt=[];document.querySelectorAll('.bub').forEach(b=>b.remove());
+  MSG.forEach((m,i)=>bt.push(setTimeout(()=>{const b=document.createElement('div');b.className='bub';b.textContent=m;b.style.top=(18+Math.random()*10+i*9)+'%';st.appendChild(b);
+    b.animate([{left:'-50%',opacity:0},{opacity:1,offset:.15},{left:'110%',opacity:1}],{duration:7000,easing:'ease-in-out',fill:'forwards'}).onfinish=()=>b.remove()},2500+i*2600)))}
+st.addEventListener('click',()=>build());
+addEventListener('resize',fit);fit();requestAnimationFrame(frame);
+</script>
+
+</body></html>
